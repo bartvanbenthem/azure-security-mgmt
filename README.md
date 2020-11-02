@@ -61,7 +61,7 @@ $ export AZURE_CLIENT_SECRET='$applicationSecret'
 ## install (Linux)
 ``` shell
 $ git clone https://github.com/bartvanbenthem/azure-update-mgmt.git
-$ sudo cp azure-mgmt/tree/master/clitools/bin/* /usr/bin/
+$ sudo cp azure-update-mgmt/tree/master/clitools/bin/* /usr/bin/
 ```
 
 ## azm-win-updatemgmt
@@ -73,11 +73,5 @@ $ export AZURE_SUBSCRIPTION_ID='<<subscriptionID>>'
 $ export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
 $ export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
 $ export AZURE_CLIENT_NAME='<<customer-name>>'
-$ azm-win-updatemgmt
-```
-
-## azm-updatemgmt
-Tool to query all the Windows and Linux virtual machines within a specific subscription and the update management status from the log analytics workspace extension.
-``` shell
-# in development
+$ azure-update-mgmt
 ```
