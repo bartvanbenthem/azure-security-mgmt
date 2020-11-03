@@ -11,14 +11,19 @@ import (
 	"github.com/Azure/go-autorest/autorest"
 )
 
+type RmVMClient struct{}
+
 type VMListResult struct {
 	ID             string
 	Name           string
 	ResourceGroup  string
 	SubscriptionID string
+	VMID           string
 }
 
-type RmVMClient struct{}
+func (c *RmVMClient) GetOSType() {
+	//OSType = string(vm.StorageProfile.OsDisk.OsType)
+}
 
 func (c *RmVMClient) List(a autorest.Authorizer, subscriptionID string) []VMListResult {
 	var virtualmachine VMListResult
@@ -38,38 +43,10 @@ func (c *RmVMClient) List(a autorest.Authorizer, subscriptionID string) []VMList
 		virtualmachine.ResourceGroup = slid[4]
 		virtualmachine.SubscriptionID = slid[2]
 		virtualmachine.Name = *vm.Name
+		virtualmachine.VMID = *vm.VMID
 		virtualmachines = append(virtualmachines, virtualmachine)
 	}
 	return virtualmachines
-}
-
-func (c *RmVMClient) GetVMID(a autorest.Authorizer, vmName, resourceGroup, subscriptionID string) string {
-	// query virtual machines
-	computeClient := compute.NewVirtualMachinesClient(subscriptionID)
-	computeClient.Authorizer = a
-	vm, err := computeClient.Get(context.Background(), resourceGroup, vmName, "instanceView")
-	if err != nil {
-		panic(err)
-	}
-	// Get the VM UUID
-	vmID := string(*vm.VMID)
-
-	return vmID
-}
-
-func (c *RmVMClient) GetOSType(a autorest.Authorizer, vmName, resourceGroup, subscriptionID string) string {
-	//OSType = string(vm.StorageProfile.OsDisk.OsType)
-	// query virtual machines
-	computeClient := compute.NewVirtualMachinesClient(subscriptionID)
-	computeClient.Authorizer = a
-	vm, err := computeClient.Get(context.Background(), resourceGroup, vmName, "instanceView")
-	if err != nil {
-		panic(err)
-	}
-	//OSType = string(vm.StorageProfile.OsDisk.OsType)
-	osType := string(vm.StorageProfile.OsDisk.OsType)
-
-	return osType
 }
 
 func (c *RmVMClient) GetWorkspaceID(a autorest.Authorizer, vmName, resourceGroup, subscriptionID string) string {
@@ -141,5 +118,6 @@ func (c *RmVMClient) GetManagedByTag(a autorest.Authorizer, vmName, resourceGrou
 	} else {
 		managedBy = client
 	}
+
 	return managedBy
 }
