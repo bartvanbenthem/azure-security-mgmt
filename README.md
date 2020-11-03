@@ -1,5 +1,5 @@
 # Description
-Query all the Windows and Linux virtual machines within a specific subscription and the update management status from the log analytics workspace extension.
+Query all the Windows and Linux virtual machines within a specific subscription and get the update management status from the log analytics workspace extension.
 
 # Description
 Module that contains CLI tools and the supporting packages for Azure development and administration. (Azure-sdk-for-go is used)
