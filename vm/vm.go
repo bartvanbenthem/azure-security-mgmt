@@ -116,7 +116,7 @@ func (c *RmVMClient) GetManagedByTag(a autorest.Authorizer, vmName, resourceGrou
 	// import environment variables
 	managedkey := os.Getenv("AZURE_MANAGED_BY_TAGGING_KEY")
 	managedval := os.Getenv("AZURE_MANAGED_BY_TAGGING_VALUE")
-	client := os.Getenv("AZURE_CLIENT_NAME")
+	tenant := os.Getenv("AZURE_TENANT_NAME")
 
 	// query virtual machines
 	computeClient := compute.NewVirtualMachinesClient(subscriptionID)
@@ -139,7 +139,7 @@ func (c *RmVMClient) GetManagedByTag(a autorest.Authorizer, vmName, resourceGrou
 	if tags[managedkey] == managedval {
 		managedBy = tags[managedkey]
 	} else {
-		managedBy = client
+		managedBy = tenant
 	}
 	return managedBy
 }
