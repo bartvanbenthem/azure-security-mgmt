@@ -28,8 +28,8 @@ func main() {
 	subscriptionID := os.Getenv("AZURE_SUBSCRIPTION_ID")
 
 	// test Virtual Machine information printer
-	//var print printer.PrintClient
-	//print.VMFormatted(rmAuth, subscriptionID)
+	var print printer.PrintClient
+	print.VMFormatted(rmAuth, subscriptionID)
 
 	var workspaces []string
 	var vmclient vm.RmVMClient
@@ -44,9 +44,9 @@ func main() {
 	// Get unique values from the string slice of workspace ID`s
 	uworkspaces := UniqueString(workspaces)
 
-	var print printer.PrintClient
+	var printlaw printer.PrintClient
 	for _, w := range uworkspaces {
-		print.LAWTableRowsCommaSep(lawAuth, w)
+		printlaw.LAWTableRowsCommaSep(lawAuth, w)
 	}
 
 }
