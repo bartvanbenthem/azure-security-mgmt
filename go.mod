@@ -1,4 +1,4 @@
-module github.com/bartvanbenthem/azure-update-mgmt
+module github.com/bartvanbenthem/azure-security-mgmt
 
 go 1.14
 

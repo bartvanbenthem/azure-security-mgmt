@@ -57,7 +57,10 @@ func (c *LAWClient) Query(a autorest.Authorizer, workspaceID, lawQuery string) (
 	return qresult, err
 }
 
+////////////////////////////////////////////////////////////////////
 // TEMP FUNCTIONS FOR TESTING PURPOSES
+////////////////////////////////////////////////////////////////////
+
 type QueryResultRaw struct {
 	Header string
 	Rows   []string

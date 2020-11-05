@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/Azure/go-autorest/autorest/azure/auth"
-	"github.com/bartvanbenthem/azure-update-mgmt/law"
+	"github.com/bartvanbenthem/azure-security-mgmt/law"
 )
 
 func main() {
