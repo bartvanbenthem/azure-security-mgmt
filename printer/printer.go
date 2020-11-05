@@ -39,13 +39,6 @@ func (p PrintClient) LAWTableRowsCommaSep(auth autorest.Authorizer, workspaceID 
 	res := lawclient.ResultParserLAWQueryResult(bresult)
 
 	for _, table := range res.Tables {
-		for _, col := range table.Columns {
-			fmt.Printf("%v,", col.Name)
-		}
-		fmt.Printf("\n")
-	}
-
-	for _, table := range res.Tables {
 		for _, row := range table.Rows {
 			for _, item := range row {
 				fmt.Printf("%v,", item)

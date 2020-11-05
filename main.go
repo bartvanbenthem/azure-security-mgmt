@@ -35,7 +35,10 @@ func main() {
 	var vmclient vm.RmVMClient
 	for _, vm := range vmclient.List(rmAuth, subscriptionID) {
 		workspace := vmclient.GetWorkspaceID(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
-		workspaces = append(workspaces, workspace)
+		managedby := vmclient.GetManagedByTag(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
+		if managedby == os.Getenv("AZURE_MANAGED_BY_TAGGING_VALUE") {
+			workspaces = append(workspaces, workspace)
+		}
 	}
 
 	// Get unique values from the string slice of workspace ID`s
