@@ -24,6 +24,8 @@ github.com/Azure/go-autorest/logger v0.2.0 h1:e4RVHVZKC5p6UANLJHkM4OfR1UKZPj8Wt8
 github.com/Azure/go-autorest/logger v0.2.0/go.mod h1:T9E3cAhj2VqvPOtCYAvby9aBXkZmbF5NWuPV8+WeEW8=
 github.com/Azure/go-autorest/tracing v0.6.0 h1:TYi4+3m5t6K48TGI9AUdb+IzbnSxvnvUMfuitfgcfuo=
 github.com/Azure/go-autorest/tracing v0.6.0/go.mod h1:+vhtPC754Xsa23ID7GlGsrdKBpUA79WCAKPPZVC2DeU=
+github.com/bartvanbenthem/azure-security-mgmt v0.0.0-20201105153137-b5def1033435 h1:N0+vZ5oTx0MZ/yDpC3/WsxSdN0wRaCeS8d4alQ8hUjA=
+github.com/bartvanbenthem/azure-security-mgmt v0.0.0-20201105153137-b5def1033435/go.mod h1:p80cbhWfDyt/AMFSkr7QS89dtzd/TmRMn4L7GGQdC0c=
 github.com/bartvanbenthem/azure-update-mgmt v0.0.0-20201104212624-0b93d024ba8f h1:klM2fFBn/hu8NHzy4GIXobCXE71YGm+rRlV1aX48qfg=
 github.com/bartvanbenthem/azure-update-mgmt v0.0.0-20201104212624-0b93d024ba8f/go.mod h1:P64ScxT08n0faX2T63jgSH6eHdXQ/W4TW3xoUbhqjKk=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -70,6 +70,5 @@ $ export AZURE_SUBSCRIPTION_ID='<<subscription-id>>'
 $ export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
 $ export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
 $ export AZURE_TENANT_NAME='<<tenant-name>>'
+$ azure-update-mgmt
 ```
-
-...

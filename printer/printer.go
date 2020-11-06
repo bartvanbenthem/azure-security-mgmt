@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Azure/go-autorest/autorest"
-	"github.com/bartvanbenthem/azure-security-mgmt/law"
+	"github.com/bartvanbenthem/azure-update-mgmt/law"
 	"github.com/bartvanbenthem/azure-update-mgmt/vm"
 )
 

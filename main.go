@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/Azure/go-autorest/autorest/azure/auth"
-	"github.com/bartvanbenthem/azure-security-mgmt/printer"
-	"github.com/bartvanbenthem/azure-security-mgmt/vm"
+	"github.com/bartvanbenthem/azure-update-mgmt/printer"
+	"github.com/bartvanbenthem/azure-update-mgmt/vm"
 )
 
 func main() {
