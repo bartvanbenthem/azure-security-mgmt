@@ -11,20 +11,9 @@ import (
 )
 
 func main() {
-	// create an authorizer from the following environment variables
-	// AZURE_CLIENT_ID
-	// AZURE_CLIENT_SECRET
-	// AZURE_TENANT_ID
-	rmAuth, err := auth.NewAuthorizerFromEnvironment()
-	if err != nil {
-		panic(err)
-	}
-
-	// LAW AUTH
-	lawAuth, err := auth.NewAuthorizerFromEnvironmentWithResource("https://api.loganalytics.io")
-	if err != nil {
-		panic(err)
-	}
+	// GET authorizations
+	rmAuth := resourceManagerAuthorizer()
+	lawAuth := loganalyticsAuthorizer()
 
 	// GET AZURE_SUBSCRIPTION_ID
 	subscriptionID := os.Getenv("AZURE_SUBSCRIPTION_ID")
@@ -52,22 +41,46 @@ func main() {
 			fmt.Printf("%-50v %-10v %-10v %-10v\n", r.DisplayName, r.MissingSecurityUpdatesCount, r.MissingCriticalUpdatesCount, r.Compliance)
 		}
 	}
+}
 
-	/*
-		// TEST GENERIC LAW RETURN FUNCTIONS
-		var law law.LAWClient
-		for _, w := range uworkspaces {
-			fmt.Println(law.ReturnColumnSlice(lawAuth, w))
+func resourceManagerAuthorizer() autorest.Authorizer {
+	var rmAuth autorest.Authorizer
+	var err error
+	if len(os.Getenv("AZURE_CLIENT_ID")) == 0 || len(os.Getenv("AZURE_CLIENT_SECRET")) == 0 {
+		// create an resource manager authorizer from the az cli configuration
+		rmAuth, err = auth.NewAuthorizerFromCLI()
+		if err != nil {
+			panic(err)
 		}
-
-		for _, w := range uworkspaces {
-			result := law.ReturnRowSlice(lawAuth, w)
-			for _, r := range result {
-				fmt.Println(r)
-			}
+	} else {
+		// create an resource manager authorizer from the following environment variables
+		// AZURE_CLIENT_ID  | AZURE_CLIENT_SECRET | AZURE_TENANT_ID
+		rmAuth, err = auth.NewAuthorizerFromEnvironment()
+		if err != nil {
+			panic(err)
 		}
-	*/
+	}
+	return rmAuth
+}
 
+func loganalyticsAuthorizer() autorest.Authorizer {
+	var lawAuth autorest.Authorizer
+	var err error
+	if len(os.Getenv("AZURE_CLIENT_ID")) == 0 || len(os.Getenv("AZURE_CLIENT_SECRET")) == 0 {
+		// create an LAW authorizer from the az cli configuration
+		lawAuth, err = auth.NewAuthorizerFromCLIWithResource("https://api.loganalytics.io")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		// create an LAW authorizer from the following environment variables
+		// AZURE_CLIENT_ID  | AZURE_CLIENT_SECRET | AZURE_TENANT_ID
+		lawAuth, err = auth.NewAuthorizerFromEnvironmentWithResource("https://api.loganalytics.io")
+		if err != nil {
+			panic(err)
+		}
+	}
+	return lawAuth
 }
 
 func UniqueString(s []string) []string {
