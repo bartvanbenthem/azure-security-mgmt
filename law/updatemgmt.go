@@ -11,6 +11,10 @@ import (
 type UpdateMgmtQuery struct{}
 
 type ComputerListQueryResult struct {
+	Rows []ComputerListRow
+}
+
+type ComputerListRow struct {
 	ID                          string `json:"id"`
 	DisplayName                 string `json:"displayName"`
 	SourceComputerId            string `json:"sourceComputerId"`
@@ -25,7 +29,11 @@ type ComputerListQueryResult struct {
 	Environment                 string `json:"environment"`
 }
 
-func (c *ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspaceID string) []ComputerListQueryResult {
+func (c *ComputerListQueryResult) AddRow(row ComputerListRow) {
+	c.Rows = append(c.Rows, row)
+}
+
+func (c *ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspaceID string) ComputerListQueryResult {
 	var lawclient law.LAWClient
 	var q law.KustoQuery
 	qresult, err := lawclient.Query(auth, workspaceID, q.ComputerUpdatesList())
@@ -40,28 +48,30 @@ func (c *ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspa
 
 	res := lawclient.ResultParserLAWQueryResult(bresult)
 
-	var result ComputerListQueryResult
-	var results []ComputerListQueryResult
+	var computerlist ComputerListQueryResult
+
+	// add rows to computerlist
 	for _, table := range res.Tables {
 		for _, row := range table.Rows {
 			row := fmt.Sprintf("%v", row)
 			rowItems := strings.Fields(row)
-			result.ID = rowItems[0]
-			result.DisplayName = rowItems[1]
-			result.SourceComputerId = rowItems[2]
-			result.ScopedToUpdatesSolution = rowItems[3]
-			result.MissingCriticalUpdatesCount = rowItems[4]
-			result.MissingSecurityUpdatesCount = rowItems[5]
-			result.MissingOtherUpdatesCount = rowItems[6]
-			result.Compliance = rowItems[7]
-			result.LastAssessedTime = rowItems[8]
-			result.LastUpdateAgentSeenTime = ""
-			result.OSType = rowItems[9]
-			result.Environment = rowItems[10]
-			results = append(results, result)
+			result := ComputerListRow{ID: rowItems[0],
+				DisplayName:                 rowItems[1],
+				SourceComputerId:            rowItems[2],
+				ScopedToUpdatesSolution:     rowItems[3],
+				MissingCriticalUpdatesCount: rowItems[4],
+				MissingSecurityUpdatesCount: rowItems[5],
+				MissingOtherUpdatesCount:    rowItems[6],
+				Compliance:                  rowItems[7],
+				LastAssessedTime:            rowItems[8],
+				LastUpdateAgentSeenTime:     "",
+				OSType:                      rowItems[9],
+				Environment:                 rowItems[10],
+			}
+			computerlist.AddRow(result)
 		}
 	}
-	return results
+	return computerlist
 }
 
 func (q *UpdateMgmtQuery) ComputerUpdatesList() string {

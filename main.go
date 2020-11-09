@@ -33,12 +33,12 @@ func main() {
 
 	// computerlist query result LAW
 	var computerlist law.ComputerListQueryResult
-	fmt.Printf("%-50v %-10v %-10v %-10v\n", "name", "security", "critical", "compliance")
-	fmt.Printf("%-50v %-10v %-10v %-10v\n", "----", "--------", "--------", "----------")
 	for _, w := range uworkspaces {
 		result := computerlist.ReturnObject(lawAuth, w)
-		for _, r := range result {
-			fmt.Printf("%-50v %-10v %-10v %-10v\n", r.DisplayName, r.MissingSecurityUpdatesCount, r.MissingCriticalUpdatesCount, r.Compliance)
+		for _, r := range result.Rows {
+			fmt.Printf("%-50v %-10v %-10v %-10v\n",
+				r.DisplayName, r.MissingSecurityUpdatesCount,
+				r.MissingCriticalUpdatesCount, r.Compliance)
 		}
 	}
 }
