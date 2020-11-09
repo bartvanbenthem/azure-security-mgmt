@@ -44,10 +44,12 @@ func main() {
 
 	// computerlist query result LAW
 	var computerlist law.ComputerListQueryResult
+	fmt.Printf("%-50v %-10v %-10v %-10v\n", "name", "security", "critical", "compliance")
+	fmt.Printf("%-50v %-10v %-10v %-10v\n", "----", "--------", "--------", "----------")
 	for _, w := range uworkspaces {
 		result := computerlist.ReturnObject(lawAuth, w)
 		for _, r := range result {
-			fmt.Printf("%v, %v \n", r.DisplayName, r.Compliance)
+			fmt.Printf("%-50v %-10v %-10v %-10v\n", r.DisplayName, r.MissingSecurityUpdatesCount, r.MissingCriticalUpdatesCount, r.Compliance)
 		}
 	}
 
@@ -80,7 +82,7 @@ func UniqueString(s []string) []string {
 	return list
 }
 
-func FormattedPrint(auth autorest.Authorizer, subscriptionID string) {
+func vmPrint(auth autorest.Authorizer, subscriptionID string) {
 	var vmclient vm.RmVMClient
 	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "Name", "workspaceID", "ostype", "UUID", "managedby")
 	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "----", "-----------", "------", "----", "---------")

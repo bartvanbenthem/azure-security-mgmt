@@ -25,8 +25,6 @@ type ComputerListQueryResult struct {
 	Environment                 string `json:"environment"`
 }
 
-func (c *ComputerListQueryResult) ReturnJSON(auth autorest.Authorizer, workspaceID string) {}
-
 func (c *ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspaceID string) []ComputerListQueryResult {
 	var lawclient law.LAWClient
 	var q law.KustoQuery
