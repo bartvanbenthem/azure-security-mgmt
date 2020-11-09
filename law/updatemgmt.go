@@ -33,6 +33,8 @@ func (c *ComputerListQueryResult) AddRow(row ComputerListRow) {
 	c.Rows = append(c.Rows, row)
 }
 
+func (c *ComputerListQueryResult) ConvertToHumanReadable(qr ComputerListQueryResult) {}
+
 func (c *ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspaceID string) ComputerListQueryResult {
 	var lawclient law.LAWClient
 	var q law.KustoQuery

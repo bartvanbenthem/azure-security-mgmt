@@ -36,7 +36,7 @@ func main() {
 	for _, w := range uworkspaces {
 		result := computerlist.ReturnObject(lawAuth, w)
 		for _, r := range result.Rows {
-			fmt.Printf("%-50v %-10v %-10v %-10v\n",
+			fmt.Printf("%v,%v,%v,%v\n",
 				r.DisplayName, r.MissingSecurityUpdatesCount,
 				r.MissingCriticalUpdatesCount, r.Compliance)
 		}
