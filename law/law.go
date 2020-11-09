@@ -43,10 +43,9 @@ func (c *LAWClient) Query(a autorest.Authorizer, workspaceID, lawQuery string) (
 	return qresult, err
 }
 
-func (c *LAWClient) ReturnRowSlice(auth autorest.Authorizer, workspaceID string) []string {
+func (c *LAWClient) ReturnRowSlice(auth autorest.Authorizer, workspaceID, lawQuery string) []string {
 	var lawclient law.LAWClient
-	var q law.KustoQuery
-	qresult, err := lawclient.Query(auth, workspaceID, q.ComputerUpdatesList())
+	qresult, err := lawclient.Query(auth, workspaceID, lawQuery)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -62,10 +61,9 @@ func (c *LAWClient) ReturnRowSlice(auth autorest.Authorizer, workspaceID string)
 	return results
 }
 
-func (c *LAWClient) ReturnColumnSlice(auth autorest.Authorizer, workspaceID string) []string {
+func (c *LAWClient) ReturnColumnSlice(auth autorest.Authorizer, workspaceID, lawQuery string) []string {
 	var lawclient law.LAWClient
-	var q law.KustoQuery
-	qresult, err := lawclient.Query(auth, workspaceID, q.ComputerUpdatesList())
+	qresult, err := lawclient.Query(auth, workspaceID, lawQuery)
 	if err != nil {
 		fmt.Println(err)
 	}

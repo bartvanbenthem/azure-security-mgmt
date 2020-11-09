@@ -32,7 +32,7 @@ func main() {
 	uworkspaces := UniqueString(workspaces)
 
 	// computerlist query result LAW
-	var computerlist law.ComputerListQueryResult
+	var computerlist law.ComputerUpdatesList
 	for _, w := range uworkspaces {
 		result := computerlist.ReturnObject(lawAuth, w)
 		for _, r := range result.Rows {
