@@ -41,26 +41,29 @@ func main() {
 	// Get unique values from the string slice of workspace ID`s
 	uworkspaces := UniqueString(workspaces)
 
-	// LAW query
+	// computerlist query result LAW
 	var computerlist law.ComputerListQueryResult
 	for _, w := range uworkspaces {
 		result := computerlist.ReturnObject(lawAuth, w)
 		for _, r := range result {
-			fmt.Println(r.DisplayName)
+			fmt.Printf("%v, %v \n", r.DisplayName, r.Compliance)
 		}
 	}
 
-	var law law.LAWClient
-	for _, w := range uworkspaces {
-		fmt.Println(law.ReturnColumnSlice(lawAuth, w))
-	}
-
-	for _, w := range uworkspaces {
-		result := law.ReturnRowSlice(lawAuth, w)
-		for _, r := range result {
-			fmt.Println(r)
+	/*
+		// TEST GENERIC LAW RETURN FUNCTIONS
+		var law law.LAWClient
+		for _, w := range uworkspaces {
+			fmt.Println(law.ReturnColumnSlice(lawAuth, w))
 		}
-	}
+
+		for _, w := range uworkspaces {
+			result := law.ReturnRowSlice(lawAuth, w)
+			for _, r := range result {
+				fmt.Println(r)
+			}
+		}
+	*/
 
 }
 

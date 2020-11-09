@@ -1,10 +1,84 @@
 package law
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
 
-type KustoQuery struct{}
+	"github.com/Azure/go-autorest/autorest"
+	"github.com/bartvanbenthem/azure-security-mgmt/law"
+	"github.com/bartvanbenthem/azure-update-mgmt/vm"
+)
 
-func (q *KustoQuery) ComputerUpdatesList() string {
+type UpdateMgmtQuery struct{}
+
+type ComputerListQueryResult struct {
+	ID                          string `json:"id"`
+	DisplayName                 string `json:"displayName"`
+	SourceComputerId            string `json:"sourceComputerId"`
+	ScopedToUpdatesSolution     string `json:"scopedToUpdatesSolution"`
+	MissingCriticalUpdatesCount string `json:"missingCriticalUpdatesCount"`
+	MissingSecurityUpdatesCount string `json:"missingSecurityUpdatesCount"`
+	MissingOtherUpdatesCount    string `json:"missingOtherUpdatesCount"`
+	Compliance                  string `json:"compliance"`
+	LastAssessedTime            string `json:"lastAssessedTime"`
+	LastUpdateAgentSeenTime     string `json:"lastUpdateAgentSeenTime"`
+	OSType                      string `json:"osType"`
+	Environment                 string `json:"environment"`
+}
+
+func (c ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspaceID string) []ComputerListQueryResult {
+	var lawclient law.LAWClient
+	var q law.KustoQuery
+	qresult, err := lawclient.Query(auth, workspaceID, q.ComputerUpdatesList())
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	bresult, err := lawclient.ResultParserByte(qresult)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	res := lawclient.ResultParserLAWQueryResult(bresult)
+
+	var result ComputerListQueryResult
+	var results []ComputerListQueryResult
+	for _, table := range res.Tables {
+		for _, row := range table.Rows {
+			row := fmt.Sprintf("%v", row)
+			rowItems := strings.Fields(row)
+			result.ID = rowItems[0]
+			result.DisplayName = rowItems[1]
+			result.SourceComputerId = rowItems[2]
+			result.ScopedToUpdatesSolution = rowItems[3]
+			result.MissingCriticalUpdatesCount = rowItems[4]
+			result.MissingSecurityUpdatesCount = rowItems[5]
+			result.MissingOtherUpdatesCount = rowItems[6]
+			result.Compliance = rowItems[7]
+			result.LastAssessedTime = rowItems[8]
+			result.LastUpdateAgentSeenTime = ""
+			result.OSType = rowItems[9]
+			result.Environment = rowItems[10]
+			results = append(results, result)
+		}
+	}
+	return results
+}
+
+func (c ComputerListQueryResult) FormattedPrint(auth autorest.Authorizer, subscriptionID string) {
+	var vmclient vm.RmVMClient
+	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "Name", "workspaceID", "ostype", "UUID", "managedby")
+	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "----", "-----------", "------", "----", "---------")
+	for _, vm := range vmclient.List(auth, subscriptionID) {
+		workspace := vmclient.GetWorkspaceID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
+		managedby := vmclient.GetManagedByTag(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
+		ostype := vmclient.GetOSType(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
+		vmid := vmclient.GetVMID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
+		fmt.Printf("%-20v %-40v %-10v %-40v %v\n", vm.Name, workspace, ostype, vmid, managedby)
+	}
+}
+
+func (q *UpdateMgmtQuery) ComputerUpdatesList() string {
 	const list string = `Heartbeat
 	| where TimeGenerated>ago(12h) and OSType=="Linux" and notempty(Computer)
 	| summarize arg_max(TimeGenerated, Solutions, Computer, ResourceId, ComputerEnvironment, VMUUID) by SourceComputerId
@@ -51,7 +125,7 @@ func (q *KustoQuery) ComputerUpdatesList() string {
 	return list
 }
 
-func (q *KustoQuery) MissingUpdatesList() string {
+func (q *UpdateMgmtQuery) MissingUpdatesList() string {
 	const list string = `Update
 	| where TimeGenerated>ago(5h) and OSType=="Linux" and SourceComputerId in ((Heartbeat
 	| where TimeGenerated>ago(12h) and OSType=="Linux" and notempty(Computer)
@@ -79,7 +153,7 @@ func (q *KustoQuery) MissingUpdatesList() string {
 	return list
 }
 
-func (q *KustoQuery) MissingUpdatesSingleWinList(VMUUID string) string {
+func (q *UpdateMgmtQuery) MissingUpdatesSingleWinList(VMUUID string) string {
 	list := fmt.Sprintf(`Update
 	| where TimeGenerated>ago(14h) and OSType!="Linux" and (Optional==false or Classification has "Critical" or Classification has "Security") and VMUUID=~"%v"
 	| summarize hint.strategy=partitioned arg_max(TimeGenerated, UpdateState, Classification, Title, KBID, PublishedDate, Approved) by Computer, SourceComputerId, UpdateID
@@ -93,7 +167,7 @@ func (q *KustoQuery) MissingUpdatesSingleWinList(VMUUID string) string {
 	return list
 }
 
-func (q *KustoQuery) MissingUpdatesSingleLinuxList(VMUUID01, VMUUID02 string) string {
+func (q *UpdateMgmtQuery) MissingUpdatesSingleLinuxList(VMUUID01, VMUUID02 string) string {
 	list := fmt.Sprintf(`Update
 	| where TimeGenerated>ago(5h) and OSType=="Linux" and (VMUUID=~"%v" or VMUUID=~"%v")
 	| summarize hint.strategy=partitioned arg_max(TimeGenerated, UpdateState, Classification, BulletinUrl, BulletinID) by Computer, SourceComputerId, Product, ProductArch
