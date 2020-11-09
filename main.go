@@ -1,10 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/Azure/go-autorest/autorest/azure/auth"
-	"github.com/bartvanbenthem/azure-update-mgmt/printer"
+	"github.com/bartvanbenthem/azure-update-mgmt/law"
 	"github.com/bartvanbenthem/azure-update-mgmt/vm"
 )
 
@@ -27,10 +28,7 @@ func main() {
 	// GET AZURE_SUBSCRIPTION_ID
 	subscriptionID := os.Getenv("AZURE_SUBSCRIPTION_ID")
 
-	// test Virtual Machine information printer
-	var print printer.PrintClient
-	print.VMFormatted(rmAuth, subscriptionID)
-
+	// Get virtual machines and workspaces
 	var workspaces []string
 	var vmclient vm.RmVMClient
 	for _, vm := range vmclient.List(rmAuth, subscriptionID) {
@@ -40,13 +38,28 @@ func main() {
 			workspaces = append(workspaces, workspace)
 		}
 	}
-
 	// Get unique values from the string slice of workspace ID`s
 	uworkspaces := UniqueString(workspaces)
 
-	var printlaw printer.PrintClient
+	// LAW query
+	var computerlist law.ComputerListQueryResult
 	for _, w := range uworkspaces {
-		printlaw.LAWTableRowsCommaSep(lawAuth, w)
+		result := computerlist.ReturnObject(lawAuth, w)
+		for _, r := range result {
+			fmt.Println(r.DisplayName)
+		}
+	}
+
+	var law law.LAWClient
+	for _, w := range uworkspaces {
+		fmt.Println(law.ReturnColumnSlice(lawAuth, w))
+	}
+
+	for _, w := range uworkspaces {
+		result := law.ReturnRowSlice(lawAuth, w)
+		for _, r := range result {
+			fmt.Println(r)
+		}
 	}
 
 }

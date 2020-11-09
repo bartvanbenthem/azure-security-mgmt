@@ -3,9 +3,11 @@ package law
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/Azure/azure-sdk-for-go/services/operationalinsights/v1/operationalinsights"
 	"github.com/Azure/go-autorest/autorest"
+	"github.com/bartvanbenthem/azure-security-mgmt/law"
 )
 
 type LAWQueryResult struct {
@@ -39,6 +41,42 @@ func (c *LAWClient) Query(a autorest.Authorizer, workspaceID, lawQuery string) (
 	}
 
 	return qresult, err
+}
+
+func (c *LAWClient) ReturnRowSlice(auth autorest.Authorizer, workspaceID string) []string {
+	var lawclient law.LAWClient
+	var q law.KustoQuery
+	qresult, err := lawclient.Query(auth, workspaceID, q.ComputerUpdatesList())
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var result string
+	var results []string
+	for _, table := range *qresult.Tables {
+		for _, row := range *table.Rows {
+			result = fmt.Sprintf("%v", row)
+			results = append(results, result)
+		}
+	}
+	return results
+}
+
+func (c *LAWClient) ReturnColumnSlice(auth autorest.Authorizer, workspaceID string) []string {
+	var lawclient law.LAWClient
+	var q law.KustoQuery
+	qresult, err := lawclient.Query(auth, workspaceID, q.ComputerUpdatesList())
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var columns []string
+	for _, table := range *qresult.Tables {
+		for _, col := range *table.Columns {
+			columns = append(columns, *col.Name)
+		}
+	}
+	return columns
 }
 
 func (c *LAWClient) ResultParserByte(qresult operationalinsights.QueryResults) ([]byte, error) {
