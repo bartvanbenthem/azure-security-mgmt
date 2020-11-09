@@ -6,7 +6,6 @@ import (
 
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/bartvanbenthem/azure-security-mgmt/law"
-	"github.com/bartvanbenthem/azure-update-mgmt/vm"
 )
 
 type UpdateMgmtQuery struct{}
@@ -26,7 +25,9 @@ type ComputerListQueryResult struct {
 	Environment                 string `json:"environment"`
 }
 
-func (c ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspaceID string) []ComputerListQueryResult {
+func (c *ComputerListQueryResult) ReturnJSON(auth autorest.Authorizer, workspaceID string) {}
+
+func (c *ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspaceID string) []ComputerListQueryResult {
 	var lawclient law.LAWClient
 	var q law.KustoQuery
 	qresult, err := lawclient.Query(auth, workspaceID, q.ComputerUpdatesList())
@@ -63,19 +64,6 @@ func (c ComputerListQueryResult) ReturnObject(auth autorest.Authorizer, workspac
 		}
 	}
 	return results
-}
-
-func (c ComputerListQueryResult) FormattedPrint(auth autorest.Authorizer, subscriptionID string) {
-	var vmclient vm.RmVMClient
-	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "Name", "workspaceID", "ostype", "UUID", "managedby")
-	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "----", "-----------", "------", "----", "---------")
-	for _, vm := range vmclient.List(auth, subscriptionID) {
-		workspace := vmclient.GetWorkspaceID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
-		managedby := vmclient.GetManagedByTag(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
-		ostype := vmclient.GetOSType(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
-		vmid := vmclient.GetVMID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
-		fmt.Printf("%-20v %-40v %-10v %-40v %v\n", vm.Name, workspace, ostype, vmid, managedby)
-	}
 }
 
 func (q *UpdateMgmtQuery) ComputerUpdatesList() string {
