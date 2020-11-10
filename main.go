@@ -35,10 +35,11 @@ func main() {
 	var computerlist law.ComputerUpdatesList
 	for _, w := range uworkspaces {
 		result := computerlist.ReturnObject(lawAuth, w)
-		for _, r := range result.Rows {
-			fmt.Printf("%v,%v,%v,%v\n",
-				r.DisplayName, r.MissingSecurityUpdatesCount,
-				r.MissingCriticalUpdatesCount, r.Compliance)
+		resultHR := computerlist.ConvertToReadableObject(result)
+		for _, r := range resultHR.Rows {
+			fmt.Printf("%v,%v,%v,%v,%v,%v\n",
+				r.DisplayName, r.OSType, r.MissingSecurityUpdatesCount,
+				r.MissingCriticalUpdatesCount, r.Compliance, r.LastAssessedTime)
 		}
 	}
 }

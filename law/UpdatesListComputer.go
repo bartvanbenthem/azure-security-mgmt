@@ -31,8 +31,6 @@ func (c *ComputerUpdatesList) AddRow(row ComputerListRow) {
 	c.Rows = append(c.Rows, row)
 }
 
-func (c *ComputerUpdatesList) ConvertToHumanReadable(qr ComputerUpdatesList) {}
-
 func (c *ComputerUpdatesList) ReturnObject(auth autorest.Authorizer, workspaceID string) ComputerUpdatesList {
 	var lawclient law.LAWClient
 	qresult, err := lawclient.Query(auth, workspaceID, c.ComputerUpdatesListQuery())
@@ -71,6 +69,61 @@ func (c *ComputerUpdatesList) ReturnObject(auth autorest.Authorizer, workspaceID
 		}
 	}
 	return computerlist
+}
+
+func (c *ComputerUpdatesList) ConvertToReadableObject(list ComputerUpdatesList) ComputerUpdatesList {
+	var cl ComputerUpdatesList
+	for _, row := range list.Rows {
+		result := ComputerListRow{ID: row.ID,
+			DisplayName:                 c.ConvDisplayName(row.DisplayName),
+			SourceComputerId:            row.SourceComputerId,
+			ScopedToUpdatesSolution:     row.ScopedToUpdatesSolution,
+			MissingCriticalUpdatesCount: row.MissingCriticalUpdatesCount,
+			MissingSecurityUpdatesCount: row.MissingSecurityUpdatesCount,
+			MissingOtherUpdatesCount:    row.MissingOtherUpdatesCount,
+			Compliance:                  c.ConvCompliance(row.Compliance),
+			LastAssessedTime:            row.LastAssessedTime,
+			LastUpdateAgentSeenTime:     row.LastUpdateAgentSeenTime,
+			OSType:                      c.ConvOSType(row.OSType),
+			Environment:                 row.Environment,
+		}
+		cl.AddRow(result)
+	}
+	return cl
+}
+
+func (c *ComputerUpdatesList) ConvCompliance(compliance string) string {
+	switch compliance {
+	case "1":
+		compliance = "compliant"
+	case "2":
+		compliance = "non-compliant"
+	case "3":
+		compliance = "unknown"
+	case "4":
+		compliance = "not-assessed"
+	default:
+		compliance = "unknown"
+	}
+	return compliance
+}
+
+func (c *ComputerUpdatesList) ConvOSType(ostype string) string {
+	switch ostype {
+	case "1":
+		ostype = "linux"
+	case "2":
+		ostype = "windows"
+	default:
+		ostype = "unknown"
+	}
+	return ostype
+}
+
+func (c *ComputerUpdatesList) ConvDisplayName(fqdn string) string {
+	name := strings.Split(fqdn, ".")
+	nameLower := strings.ToLower(name[0])
+	return nameLower
 }
 
 func (c *ComputerUpdatesList) ComputerUpdatesListQuery() string {
