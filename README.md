@@ -64,11 +64,35 @@ $ git clone https://github.com/bartvanbenthem/azure-update-mgmt.git
 $ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
 ```
 
-#### set environment variables
+#### run on a specific subscription with the created SPN and ENV var AUTH
 ``` shell
 $ export AZURE_SUBSCRIPTION_ID='<<subscription-id>>'
 $ export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
 $ export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
 $ export AZURE_TENANT_NAME='<<tenant-name>>'
 $ azure-update-mgmt
+```
+
+#### run on all subscriptions in the tenant with script and use the azcli config for AUTH
+``` shell
+# ENV variables
+export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
+export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
+export AZURE_TENANT_NAME='<<tenant-name>>'
+
+# get all subscriptions
+az account list --query [].id -o tsv > ../subscriptionID.list
+
+# load subscriptions into array
+subscriptions=()
+while IFS= read -r line; do
+   subscriptions+=("$line")
+done <../subscriptionID.list
+
+printf "%s,%s,%s,%s,%s,%s\n"  "name" "ostype" "security" "critical" "compliance" "assessed" > ../list.csv
+# run binary for every subscription
+for s in ${subscriptions[@]}; do {
+    export AZURE_SUBSCRIPTION_ID="$s"
+    ./azure-update-mgmt >> ../list.csv
+    }; done
 ```
