@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/Azure/go-autorest/autorest/azure/auth"
@@ -20,12 +21,14 @@ func main() {
 
 	// Get virtual machines and workspaces
 	var workspaces []string
+	var managedvms []string
 	var vmclient vm.RmVMClient
 	for _, vm := range vmclient.List(rmAuth, subscriptionID) {
 		workspace := vmclient.GetWorkspaceID(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		managedby := vmclient.GetManagedByTag(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		if managedby == os.Getenv("AZURE_MANAGED_BY_TAGGING_VALUE") {
 			workspaces = append(workspaces, workspace)
+			managedvms = append(managedvms, vm.Name)
 		}
 	}
 	// Get unique values from the string slice of workspace ID`s
@@ -37,9 +40,15 @@ func main() {
 		result := computerlist.ReturnObject(lawAuth, w)
 		resultHR := computerlist.ConvertToReadableObject(result)
 		for _, r := range resultHR.Rows {
-			fmt.Printf("%v,%v,%v,%v,%v,%v\n",
-				r.DisplayName, r.OSType, r.MissingSecurityUpdatesCount,
-				r.MissingCriticalUpdatesCount, r.Compliance, r.LastAssessedTime)
+			for _, mvm := range managedvms {
+				if strings.ToLower(mvm) == strings.ToLower(r.DisplayName) {
+					fmt.Printf("%v,%v,%v,%v,%v,%v\n",
+						r.DisplayName, r.OSType,
+						r.MissingSecurityUpdatesCount,
+						r.MissingCriticalUpdatesCount,
+						r.Compliance, r.LastAssessedTime)
+				}
+			}
 		}
 	}
 }
@@ -96,6 +105,7 @@ func UniqueString(s []string) []string {
 	return list
 }
 
+// TEST FUNCTIONS
 func vmPrint(auth autorest.Authorizer, subscriptionID string) {
 	var vmclient vm.RmVMClient
 	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "Name", "workspaceID", "ostype", "UUID", "managedby")
