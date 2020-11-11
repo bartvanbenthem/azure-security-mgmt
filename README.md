@@ -1,9 +1,6 @@
 # Description
 Query all the managed Windows and Linux virtual machines within a specific subscription and their update management compliance from the log analytics workspace extension.
 
-# Description
-Module that contains CLI tools and the supporting packages for Azure development and administration. (Azure-sdk-for-go is used)
-
 ## prerequisites
 Install azure cli: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
 
