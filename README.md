@@ -64,6 +64,8 @@ $ git clone https://github.com/bartvanbenthem/azure-update-mgmt.git
 $ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
 ```
 
+## Examples
+
 #### run on a specific subscription with the created SPN and ENV var AUTH
 ``` shell
 $ export AZURE_SUBSCRIPTION_ID='<<subscription-id>>'
