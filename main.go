@@ -24,9 +24,9 @@ func main() {
 	var managedvms []string
 	var vmclient vm.RmVMClient
 	for _, vm := range vmclient.List(rmAuth, subscriptionID) {
-		workspace := vmclient.GetWorkspaceID(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		managedby := vmclient.GetManagedByTag(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		if managedby == os.Getenv("AZURE_MANAGED_BY_TAGGING_VALUE") {
+			workspace := vmclient.GetWorkspaceID(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 			workspaces = append(workspaces, workspace)
 			managedvms = append(managedvms, vm.Name)
 		}
