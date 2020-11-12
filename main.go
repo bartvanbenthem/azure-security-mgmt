@@ -17,52 +17,21 @@ func main() {
 	rmAuth := resourceManagerAuthorizer()
 	lawAuth := loganalyticsAuthorizer()
 
-	// GET ENVIRONMENT VARIABLES
+	// GET SUBSCRIPTION FROM ENVIRONMENT VARIABLE
 	subscriptionID := os.Getenv("AZURE_SUBSCRIPTION_ID")
-	outputUpdate := os.Getenv("OUTPUT_FILE_UPDATES")
-	if len(outputUpdate) == 0 {
-		outputUpdate = "./update-mgmt.csv"
-	}
 
-	// Write All the Virtual Machines within
-	// the subscription output to csv file
+	// Write All the Virtual Machines within the
+	// subscription output to csv file
 	VMWriterCSV(rmAuth, subscriptionID)
 
 	// Get the managed virtual machines and workspaces
-	var workspaces []string
-	var managedvms []string
-	var vmclient vm.RmVMClient
-	for _, vm := range vmclient.List(rmAuth, subscriptionID) {
-		managedby := vmclient.GetManagedByTag(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
-		if managedby == os.Getenv("AZURE_MANAGED_BY_TAGGING_VALUE") {
-			workspace := vmclient.GetWorkspaceID(rmAuth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
-			workspaces = append(workspaces, workspace)
-			managedvms = append(managedvms, vm.Name)
-		}
-	}
-	// Get unique values from the string slice of workspace ID`s
-	uworkspaces := UniqueString(workspaces)
+	managedvms := GetManagedVM(rmAuth, subscriptionID)
+	workspaces := GetManagedWorkspaces(rmAuth, subscriptionID)
 
-	// computerlist query result LAW
-	var lines []string
-	var computerlist law.ComputerUpdatesList
-	for _, w := range uworkspaces {
-		result := computerlist.ReturnObject(lawAuth, w)
-		resultHR := computerlist.ConvertToReadableObject(result)
-		for _, r := range resultHR.Rows {
-			for _, mvm := range managedvms {
-				if strings.ToLower(mvm) == strings.ToLower(r.DisplayName) {
-					l := fmt.Sprintf("%v,%v,%v,%v,%v,%v\n",
-						r.DisplayName, r.OSType,
-						r.MissingSecurityUpdatesCount,
-						r.MissingCriticalUpdatesCount,
-						r.Compliance, r.LastAssessedTime)
-					lines = append(lines, l)
-				}
-			}
-		}
-	}
-	FileWriter(lines, outputUpdate)
+	// write computerlist query result update-mgmt LAW to CSV
+	// unique values from the string slice of workspace IDs
+	UpdatesWriterCSV(lawAuth, subscriptionID,
+		UniqueString(workspaces), managedvms)
 }
 
 func resourceManagerAuthorizer() autorest.Authorizer {
@@ -105,6 +74,31 @@ func loganalyticsAuthorizer() autorest.Authorizer {
 	return lawAuth
 }
 
+func GetManagedVM(auth autorest.Authorizer, subscriptionID string) []string {
+	var managedvms []string
+	var vmclient vm.RmVMClient
+	for _, vm := range vmclient.List(auth, subscriptionID) {
+		managedby := vmclient.GetManagedByTag(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
+		if managedby == os.Getenv("AZURE_MANAGED_BY_TAGGING_VALUE") {
+			managedvms = append(managedvms, vm.Name)
+		}
+	}
+	return managedvms
+}
+
+func GetManagedWorkspaces(auth autorest.Authorizer, subscriptionID string) []string {
+	var workspaces []string
+	var vmclient vm.RmVMClient
+	for _, vm := range vmclient.List(auth, subscriptionID) {
+		managedby := vmclient.GetManagedByTag(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
+		if managedby == os.Getenv("AZURE_MANAGED_BY_TAGGING_VALUE") {
+			workspace := vmclient.GetWorkspaceID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
+			workspaces = append(workspaces, workspace)
+		}
+	}
+	return workspaces
+}
+
 func UniqueString(s []string) []string {
 	keys := make(map[string]bool)
 	list := []string{}
@@ -139,8 +133,8 @@ func VMWriterCSV(auth autorest.Authorizer, subscriptionID string) {
 		outputVM = "./vm.csv"
 	}
 
-	var vmclient vm.RmVMClient
 	var lines []string
+	var vmclient vm.RmVMClient
 	for _, vm := range vmclient.List(auth, subscriptionID) {
 		workspace := vmclient.GetWorkspaceID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		managedby := vmclient.GetManagedByTag(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
@@ -150,4 +144,31 @@ func VMWriterCSV(auth autorest.Authorizer, subscriptionID string) {
 		lines = append(lines, l)
 	}
 	FileWriter(lines, outputVM)
+}
+
+func UpdatesWriterCSV(auth autorest.Authorizer, subscriptionID string, workspaces, vm []string) {
+	outputUpdate := os.Getenv("OUTPUT_FILE_UPDATES")
+	if len(outputUpdate) == 0 {
+		outputUpdate = "./update-mgmt.csv"
+	}
+
+	var lines []string
+	var computerlist law.ComputerUpdatesList
+	for _, w := range workspaces {
+		result := computerlist.ReturnObject(auth, w)
+		resultHR := computerlist.ConvertToReadableObject(result)
+		for _, r := range resultHR.Rows {
+			for _, mvm := range vm {
+				if strings.ToLower(mvm) == strings.ToLower(r.DisplayName) {
+					l := fmt.Sprintf("%v,%v,%v,%v,%v,%v\n",
+						r.DisplayName, r.OSType,
+						r.MissingSecurityUpdatesCount,
+						r.MissingCriticalUpdatesCount,
+						r.Compliance, r.LastAssessedTime)
+					lines = append(lines, l)
+				}
+			}
+		}
+	}
+	FileWriter(lines, outputUpdate)
 }
