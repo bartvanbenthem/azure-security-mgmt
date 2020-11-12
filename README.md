@@ -78,8 +78,10 @@ $ azure-update-mgmt
 export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
 export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
 export AZURE_TENANT_NAME='<<tenant-name>>'
+export OUTPUT_FILE_UPDATES='<<./update-mgmt.csv>>'
+export OUTPUT_FILE_VM='<<./vm.csv>>'
 
-# get all subscriptions
+# READ ALL SUBSCRIPTIONS
 az account list --query [].id -o tsv > ../subscriptionID.list
 
 # load subscriptions into array
@@ -88,10 +90,13 @@ while IFS= read -r line; do
    subscriptions+=("$line")
 done <../subscriptionID.list
 
-printf "%s,%s,%s,%s,%s,%s\n"  "name" "ostype" "security" "critical" "compliance" "assessed" > ../list.csv
+# set column names
+printf "%s,%s,%s,%s,%s\n" "name" "workspaceid" "ostype" "uuid" "managedby" > ../vm.csv
+printf "%s,%s,%s,%s,%s,%s\n"  "name" "ostype" "security" "critical" "compliance" "assessed" > ../update-mgmt.csv
+
 # run binary for every subscription
 for s in ${subscriptions[@]}; do {
     export AZURE_SUBSCRIPTION_ID="$s"
-    ./azure-update-mgmt >> ../list.csv
+    ./azure-update-mgmt
     }; done
 ```
