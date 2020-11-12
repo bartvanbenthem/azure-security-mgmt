@@ -1,9 +1,6 @@
 # Description
 Query all the managed Windows and Linux virtual machines within a specific subscription and their update management compliance from the log analytics workspace extension.
 
-# Description
-Module that contains CLI tools and the supporting packages for Azure development and administration. (Azure-sdk-for-go is used)
-
 ## prerequisites
 Install azure cli: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
 
@@ -63,6 +60,8 @@ $ export AZURE_CLIENT_SECRET='$applicationSecret'
 $ git clone https://github.com/bartvanbenthem/azure-update-mgmt.git
 $ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
 ```
+
+## Examples
 
 #### run on a specific subscription with the created SPN and ENV var AUTH
 ``` shell
