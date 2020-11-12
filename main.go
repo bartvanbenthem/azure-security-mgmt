@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -16,10 +17,18 @@ func main() {
 	rmAuth := resourceManagerAuthorizer()
 	lawAuth := loganalyticsAuthorizer()
 
-	// GET AZURE_SUBSCRIPTION_ID
+	// GET ENVIRONMENT VARIABLES
 	subscriptionID := os.Getenv("AZURE_SUBSCRIPTION_ID")
+	outputUpdate := os.Getenv("OUTPUT_FILE_UPDATES")
+	if len(outputUpdate) == 0 {
+		outputUpdate = "./update-mgmt.csv"
+	}
 
-	// Get virtual machines and workspaces
+	// Write All the Virtual Machines within
+	// the subscription output to csv file
+	VMWriterCSV(rmAuth, subscriptionID)
+
+	// Get the managed virtual machines and workspaces
 	var workspaces []string
 	var managedvms []string
 	var vmclient vm.RmVMClient
@@ -42,11 +51,12 @@ func main() {
 		for _, r := range resultHR.Rows {
 			for _, mvm := range managedvms {
 				if strings.ToLower(mvm) == strings.ToLower(r.DisplayName) {
-					fmt.Printf("%v,%v,%v,%v,%v,%v\n",
+					l := fmt.Sprintf("%v,%v,%v,%v,%v,%v\n",
 						r.DisplayName, r.OSType,
 						r.MissingSecurityUpdatesCount,
 						r.MissingCriticalUpdatesCount,
 						r.Compliance, r.LastAssessedTime)
+					FileWriter(l, outputUpdate)
 				}
 			}
 		}
@@ -105,16 +115,33 @@ func UniqueString(s []string) []string {
 	return list
 }
 
-// TEST FUNCTIONS
-func vmPrint(auth autorest.Authorizer, subscriptionID string) {
+func FileWriter(line, path string) {
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+
+	defer file.Close()
+	if _, err := file.WriteString(line); err != nil {
+		log.Fatal(err)
+	}
+
+}
+
+// VM writer
+func VMWriterCSV(auth autorest.Authorizer, subscriptionID string) {
+	outputVM := os.Getenv("OUTPUT_FILE_VM")
+	if len(outputVM) == 0 {
+		outputVM = "./vm.csv"
+	}
+
 	var vmclient vm.RmVMClient
-	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "Name", "workspaceID", "ostype", "UUID", "managedby")
-	fmt.Printf("%-20v %-40v %-10v %-40v %v\n", "----", "-----------", "------", "----", "---------")
 	for _, vm := range vmclient.List(auth, subscriptionID) {
 		workspace := vmclient.GetWorkspaceID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		managedby := vmclient.GetManagedByTag(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		ostype := vmclient.GetOSType(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		vmid := vmclient.GetVMID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
-		fmt.Printf("%-20v %-40v %-10v %-40v %v\n", vm.Name, workspace, ostype, vmid, managedby)
+		l := fmt.Sprintf("%v,%v,%v,%v,%v\n", vm.Name, workspace, ostype, vmid, managedby)
+		FileWriter(l, outputVM)
 	}
 }
