@@ -44,6 +44,7 @@ func main() {
 	uworkspaces := UniqueString(workspaces)
 
 	// computerlist query result LAW
+	var lines []string
 	var computerlist law.ComputerUpdatesList
 	for _, w := range uworkspaces {
 		result := computerlist.ReturnObject(lawAuth, w)
@@ -56,11 +57,12 @@ func main() {
 						r.MissingSecurityUpdatesCount,
 						r.MissingCriticalUpdatesCount,
 						r.Compliance, r.LastAssessedTime)
-					FileWriter(l, outputUpdate)
+					lines = append(lines, l)
 				}
 			}
 		}
 	}
+	FileWriter(lines, outputUpdate)
 }
 
 func resourceManagerAuthorizer() autorest.Authorizer {
@@ -115,15 +117,17 @@ func UniqueString(s []string) []string {
 	return list
 }
 
-func FileWriter(line, path string) {
+func FileWriter(lines []string, path string) {
 	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)
 	}
-
 	defer file.Close()
-	if _, err := file.WriteString(line); err != nil {
-		log.Fatal(err)
+
+	for _, line := range lines {
+		if _, err := file.WriteString(line); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }
@@ -136,12 +140,14 @@ func VMWriterCSV(auth autorest.Authorizer, subscriptionID string) {
 	}
 
 	var vmclient vm.RmVMClient
+	var lines []string
 	for _, vm := range vmclient.List(auth, subscriptionID) {
 		workspace := vmclient.GetWorkspaceID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		managedby := vmclient.GetManagedByTag(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		ostype := vmclient.GetOSType(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		vmid := vmclient.GetVMID(auth, vm.Name, vm.ResourceGroup, vm.SubscriptionID)
 		l := fmt.Sprintf("%v,%v,%v,%v,%v\n", vm.Name, workspace, ostype, vmid, managedby)
-		FileWriter(l, outputVM)
+		lines = append(lines, l)
 	}
+	FileWriter(lines, outputVM)
 }
