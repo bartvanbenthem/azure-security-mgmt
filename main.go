@@ -14,8 +14,15 @@ import (
 
 func main() {
 	// GET authorizations
-	rmAuth := resourceManagerAuthorizer()
-	lawAuth := loganalyticsAuthorizer()
+	rmAuth, err := resourceManagerAuthorizer()
+	if err != nil {
+		log.Println(err)
+	}
+
+	lawAuth, err := loganalyticsAuthorizer()
+	if err != nil {
+		log.Println(err)
+	}
 
 	// GET SUBSCRIPTION FROM ENVIRONMENT VARIABLE
 	subscriptionID := os.Getenv("AZURE_SUBSCRIPTION_ID")
@@ -34,44 +41,44 @@ func main() {
 		UniqueString(workspaces), managedvms)
 }
 
-func resourceManagerAuthorizer() autorest.Authorizer {
+func resourceManagerAuthorizer() (autorest.Authorizer, error) {
 	var rmAuth autorest.Authorizer
 	var err error
 	if len(os.Getenv("AZURE_CLIENT_ID")) == 0 || len(os.Getenv("AZURE_CLIENT_SECRET")) == 0 {
 		// create an resource manager authorizer from the az cli configuration
 		rmAuth, err = auth.NewAuthorizerFromCLI()
 		if err != nil {
-			panic(err)
+			return rmAuth, err
 		}
 	} else {
 		// create an resource manager authorizer from the following environment variables
 		// AZURE_CLIENT_ID  | AZURE_CLIENT_SECRET | AZURE_TENANT_ID
 		rmAuth, err = auth.NewAuthorizerFromEnvironment()
 		if err != nil {
-			panic(err)
+			return rmAuth, err
 		}
 	}
-	return rmAuth
+	return rmAuth, err
 }
 
-func loganalyticsAuthorizer() autorest.Authorizer {
+func loganalyticsAuthorizer() (autorest.Authorizer, error) {
 	var lawAuth autorest.Authorizer
 	var err error
 	if len(os.Getenv("AZURE_CLIENT_ID")) == 0 || len(os.Getenv("AZURE_CLIENT_SECRET")) == 0 {
 		// create an LAW authorizer from the az cli configuration
 		lawAuth, err = auth.NewAuthorizerFromCLIWithResource("https://api.loganalytics.io")
 		if err != nil {
-			panic(err)
+			return lawAuth, err
 		}
 	} else {
 		// create an LAW authorizer from the following environment variables
 		// AZURE_CLIENT_ID  | AZURE_CLIENT_SECRET | AZURE_TENANT_ID
 		lawAuth, err = auth.NewAuthorizerFromEnvironmentWithResource("https://api.loganalytics.io")
 		if err != nil {
-			panic(err)
+			return lawAuth, err
 		}
 	}
-	return lawAuth
+	return lawAuth, err
 }
 
 func GetManagedVM(auth autorest.Authorizer, subscriptionID string) []string {

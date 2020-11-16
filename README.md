@@ -81,17 +81,11 @@ export AZURE_TENANT_NAME='<<tenant-name>>'
 export OUTPUT_FILE_UPDATES='../update-mgmt.csv'
 export OUTPUT_FILE_VM='../vm.csv'
 
-# READ ALL SUBSCRIPTIONS
-az account list --query [].id -o tsv > ../subscriptionID.list
-
 # load subscriptions into array
-subscriptions=()
-while IFS= read -r line; do
-   subscriptions+=("$line")
-done <../subscriptionID.list
+subscriptions=$(az account list --query [].id -o tsv)
 
 # set column names
-printf "%s,%s,%s,%s,%s\n" "name" "workspaceid" "ostype" "uuid" "managedby" > $OUTPUT_FILE_VM
+printf "%s,%s,%s,%s,%s\n" "Name" "workspaceID" "ostype" "UUID" "managedby" > $OUTPUT_FILE_VM
 printf "%s,%s,%s,%s,%s,%s\n"  "name" "ostype" "security" "critical" "compliance" "assessed" > $OUTPUT_FILE_UPDATES
 
 # run binary for every subscription
