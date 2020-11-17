@@ -1,5 +1,5 @@
 # Description
-Query all the managed Windows and Linux virtual machines within a specific subscription and their update management compliance from the log analytics workspace extension.
+Query all the managed Windows and Linux virtual machines within a specific subscription and their update management compliance from the log analytics workspace extension. Export the virtual machines and update management results to comma seperated CSV files.
 
 ## prerequisites
 Install azure cli: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
