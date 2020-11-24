@@ -43,7 +43,7 @@ $ tenantId=$(az account show --query tenantId -o tsv)
 $ subscriptions=('<<subscription-id-01 subscription-id-02 ...>>')
 ```
     
-#### Create the Azure AD application
+Create the Azure AD application
 ``` shell
 $ applicationId=$(az ad app create \
     --display-name "$spname" \
@@ -51,17 +51,17 @@ $ applicationId=$(az ad app create \
     --query appId -o tsv)
 ```
 
-#### Update the application group memebership claims
+Update the application group memebership claims
 ``` shell
 $ az ad app update --id $applicationId --set groupMembershipClaims=All
 ```
 
-#### Create a service principal for the Azure AD application
+Create a service principal for the Azure AD application
 ``` shell
 $ az ad sp create --id $applicationId
 ```
 
-#### Get the service principal secret
+Get the service principal secret
 ``` shell
 $ applicationSecret=$(az ad sp credential reset \
     --name $applicationId \
