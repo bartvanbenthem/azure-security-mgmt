@@ -12,7 +12,7 @@ $ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
 
 ## Examples
 
-### run on all subscriptions in the tenant with script and use the current azcli config:
+### run on all subscriptions in the tenant and use the current azcli config:
 ``` shell
 # ENV variables
 export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
