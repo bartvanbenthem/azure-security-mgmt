@@ -12,15 +12,6 @@ $ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
 
 ## Examples
 
-#### run on a specific subscription with the created SPN and ENV var AUTH
-``` shell
-$ export AZURE_SUBSCRIPTION_ID='<<subscription-id>>'
-$ export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
-$ export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
-$ export AZURE_TENANT_NAME='<<tenant-name>>'
-$ azure-update-mgmt
-```
-
 #### run on all subscriptions in the tenant with script and use the azcli config for AUTH
 ``` shell
 # ENV variables
@@ -44,9 +35,8 @@ for s in ${subscriptions[@]}; do {
     }; done
 ```
 
-## create azure spn (optional)
-
-#### set variables for creating app registration
+#### run on a specific subscription with the created SPN and ENV var AUTH
+set variables for creating app registration
 ``` shell
 $ spname='<<name-spn>>'
 $ tenantId=$(az account show --query tenantId -o tsv)
@@ -86,11 +76,15 @@ for s in "${subscriptions[@]}"; do {
 }; done
 ```
 
-## set environment variables for auth
+#### set environment variables and run
 Once the Azure App registration is created set the following environment variables:
 ``` shell
-
 $ export AZURE_CLIENT_ID='$applicationId'
 $ export AZURE_TENANT_ID=$tenantId
 $ export AZURE_CLIENT_SECRET='$applicationSecret'
+$ export AZURE_SUBSCRIPTION_ID='<<subscription-id>>'
+$ export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
+$ export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
+$ export AZURE_TENANT_NAME='<<tenant-name>>'
+$ azure-update-mgmt
 ```
