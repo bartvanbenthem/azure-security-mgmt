@@ -4,7 +4,47 @@ Query all the managed Windows and Linux virtual machines within a specific subsc
 ## prerequisites
 Install azure cli: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
 
-## create azure spn
+## install
+``` shell
+$ git clone https://github.com/bartvanbenthem/azure-update-mgmt.git
+$ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
+```
+
+## Examples
+
+#### run on a specific subscription with the created SPN and ENV var AUTH
+``` shell
+$ export AZURE_SUBSCRIPTION_ID='<<subscription-id>>'
+$ export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
+$ export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
+$ export AZURE_TENANT_NAME='<<tenant-name>>'
+$ azure-update-mgmt
+```
+
+#### run on all subscriptions in the tenant with script and use the azcli config for AUTH
+``` shell
+# ENV variables
+export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
+export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
+export AZURE_TENANT_NAME='<<tenant-name>>'
+export OUTPUT_FILE_UPDATES='../update-mgmt.csv'
+export OUTPUT_FILE_VM='../vm.csv'
+
+# load subscriptions into array
+subscriptions=$(az account list --query [].id -o tsv)
+
+# set column names
+printf "%s,%s,%s,%s,%s\n" "Name" "workspaceID" "ostype" "UUID" "managedby" > $OUTPUT_FILE_VM
+printf "%s,%s,%s,%s,%s,%s\n"  "name" "ostype" "security" "critical" "compliance" "assessed" > $OUTPUT_FILE_UPDATES
+
+# run binary for every subscription
+for s in ${subscriptions[@]}; do {
+    export AZURE_SUBSCRIPTION_ID="$s"
+    azure-update-mgmt
+    }; done
+```
+
+## create azure spn (optional)
 
 #### set variables for creating app registration
 ``` shell
@@ -53,44 +93,4 @@ Once the Azure App registration is created set the following environment variabl
 $ export AZURE_CLIENT_ID='$applicationId'
 $ export AZURE_TENANT_ID=$tenantId
 $ export AZURE_CLIENT_SECRET='$applicationSecret'
-```
-
-## install
-``` shell
-$ git clone https://github.com/bartvanbenthem/azure-update-mgmt.git
-$ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
-```
-
-## Examples
-
-#### run on a specific subscription with the created SPN and ENV var AUTH
-``` shell
-$ export AZURE_SUBSCRIPTION_ID='<<subscription-id>>'
-$ export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
-$ export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
-$ export AZURE_TENANT_NAME='<<tenant-name>>'
-$ azure-update-mgmt
-```
-
-#### run on all subscriptions in the tenant with script and use the azcli config for AUTH
-``` shell
-# ENV variables
-export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
-export AZURE_MANAGED_BY_TAGGING_VALUE='<<managedby-value-name>>'
-export AZURE_TENANT_NAME='<<tenant-name>>'
-export OUTPUT_FILE_UPDATES='../update-mgmt.csv'
-export OUTPUT_FILE_VM='../vm.csv'
-
-# load subscriptions into array
-subscriptions=$(az account list --query [].id -o tsv)
-
-# set column names
-printf "%s,%s,%s,%s,%s\n" "Name" "workspaceID" "ostype" "UUID" "managedby" > $OUTPUT_FILE_VM
-printf "%s,%s,%s,%s,%s,%s\n"  "name" "ostype" "security" "critical" "compliance" "assessed" > $OUTPUT_FILE_UPDATES
-
-# run binary for every subscription
-for s in ${subscriptions[@]}; do {
-    export AZURE_SUBSCRIPTION_ID="$s"
-    ./azure-update-mgmt
-    }; done
 ```
