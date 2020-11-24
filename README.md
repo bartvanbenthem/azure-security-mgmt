@@ -12,7 +12,7 @@ $ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
 
 ## Examples
 
-#### run on all subscriptions in the tenant with script and use the azcli config for AUTH
+### run on all subscriptions in the tenant with script and use the azcli config for AUTH
 ``` shell
 # ENV variables
 export AZURE_MANAGED_BY_TAGGING_KEY='<<managedby-key-name>>'
@@ -35,7 +35,7 @@ for s in ${subscriptions[@]}; do {
     }; done
 ```
 
-#### run on a specific subscription with the created SPN and ENV var AUTH
+### run on a specific subscription with the created SPN and ENV var AUTH
 set variables for creating app registration
 ``` shell
 $ spname='<<name-spn>>'
