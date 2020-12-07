@@ -4,7 +4,8 @@ Query all the managed Windows and Linux virtual machines within a specific subsc
 ## prerequisites
 Install azure cli: https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
 
-## install
+## install (Linux or WSL)
+For Windows first configure: https://docs.microsoft.com/en-us/windows/wsl/install-win10
 ``` shell
 $ git clone https://github.com/bartvanbenthem/azure-update-mgmt.git
 $ sudo cp azure-update-mgmt/tree/master/clitools/bin/linux/* /usr/bin/
